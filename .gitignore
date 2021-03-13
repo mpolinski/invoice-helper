@@ -106,3 +106,4 @@ dist
 # Custom ignores
 
 .env.yaml
+.env.yml
