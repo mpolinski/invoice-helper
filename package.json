@@ -1,0 +1,22 @@
+{
+  "name": "invoice-helper",
+  "version": "1.0.0",
+  "description": "Gathers your invoices from a month and passes them for your tax handler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mpolinski/invoice-helper.git"
+  },
+  "author": "Mariusz Poliński",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mpolinski/invoice-helper/issues"
+  },
+  "homepage": "https://github.com/mpolinski/invoice-helper#readme",
+  "dependencies": {
+    "dotenv-yaml": "^0.1.4"
+  }
+}
