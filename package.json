@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Gathers your invoices from a month and passes them for your tax handler",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/mpolinski/invoice-helper#readme",
   "dependencies": {
-    "dotenv-yaml": "^0.1.4"
+    "dotenv-yaml": "^0.1.4",
+    "imap": "^0.8.19"
   }
 }
