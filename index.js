@@ -1,33 +1,71 @@
 //require('dotenv-yaml').config();
-import envyaml from 'dotenv-yaml';
-import fs from 'fs';
-// import base64 from 'base64-stream';
-import path from 'path';
-// import { simpleParser } from 'mailparser';
-import Imap from 'imap';
+import envyaml from "dotenv-yaml";
+import Imap from "imap";
+import { inspect } from "util";
 
-envyaml.config()
+envyaml.config();
 
-// host gmail
 const imap = new Imap({
-    user: process.env.IMAP_USER,
-    password: process.env.IMAP_PASSWORD,
-    host: process.env.IMAP_HOST,
-    port: process.env.IMAP_PORT,
-    tls: true,
+  user: process.env.IMAP_USER,
+  password: process.env.IMAP_PASSWORD,
+  host: process.env.IMAP_HOST,
+  port: process.env.IMAP_PORT,
+  tls: true,
+  tlsOptions: { rejectUnauthorized: false },
 });
-console.log('Starting read mail ...');
+console.log("Starting read mail ...");
 
-imap.once('ready', () => {
-    imap.openBox('INBOX', false, (err, box) => {
-        if (err) {
-            console.log(err);
-        }
-    })
+function openInbox(cb) {
+  imap.openBox("INBOX", true, cb);
+}
+
+imap.once("ready", function () {
+  openInbox(function (err, box) {
+    if (err) throw err;
+
+    var f = imap.seq.fetch("1:3", {
+      bodies: "HEADER.FIELDS (FROM TO SUBJECT DATE)",
+      struct: true,
+    });
+
+    f.on("message", function (msg, seqno) {
+      console.log("Message #%d", seqno);
+      var prefix = "(#" + seqno + ") ";
+      msg.on("body", function (stream, info) {
+        var buffer = "";
+        stream.on("data", function (chunk) {
+          buffer += chunk.toString("utf8");
+        });
+        stream.once("end", function () {
+          console.log(
+            prefix + "Parsed header: %s",
+            inspect(Imap.parseHeader(buffer))
+          );
+        });
+      });
+      msg.once("attributes", function (attrs) {
+        console.log(prefix + "Attributes: %s", inspect(attrs, false, 8));
+      });
+      msg.once("end", function () {
+        console.log(prefix + "Finished");
+      });
+    });
+    f.once("error", function (err) {
+      console.log("Fetch error: " + err);
+    });
+    f.once("end", function () {
+      console.log("Done fetching all messages!");
+      imap.end();
+    });
+  });
 });
 
-imap.search(['UNSEEN', ['HEADER', 'SUBJECT','hello world']], (err1, results) => {
-    if (err1) {
-        console.log(err1);
-    }
+imap.once("error", function (err) {
+  console.log(err);
 });
+
+imap.once("end", function () {
+  console.log("Connection ended");
+});
+
+imap.connect();
