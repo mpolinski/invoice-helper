@@ -3,7 +3,6 @@ import Imap from "imap";
 import { inspect } from "util";
 import fs from "fs";
 import base64 from "base64-stream";
-import { exit } from "process";
 
 envyaml.config();
 
@@ -61,7 +60,7 @@ function getSearchCriteria() {
 }
 
 function buildAttMessageFunction(attachment) {
-  var filename = attachment.params.name;
+  var filename = "downloadedAttachments/" + attachment.params.name;
   var encoding = attachment.encoding;
 
   return function (msg, seqno) {

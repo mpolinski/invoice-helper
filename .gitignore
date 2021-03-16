@@ -107,3 +107,5 @@ dist
 
 .env.yaml
 .env.yml
+!/downloadedAttachments
+/downloadedAttachments/**
