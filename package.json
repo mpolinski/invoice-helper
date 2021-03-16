@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/mpolinski/invoice-helper#readme",
   "dependencies": {
+    "base64-stream": "^1.0.0",
+    "dayjs": "^1.10.4",
     "dotenv-yaml": "^0.1.4",
     "imap": "^0.8.19"
   }

@@ -2,7 +2,7 @@ import envyaml from "dotenv-yaml";
 import Imap from "imap";
 import { inspect } from "util";
 import fs from "fs";
-import base64 from "base64-stream";
+import { Base64Decode } from "base64-stream";
 
 envyaml.config();
 
@@ -16,6 +16,8 @@ const imap = new Imap({
 });
 
 console.log("Starting read mail ...");
+// const now = dayjs();
+// console.log(now);
 
 function toUpper(thing) {
   return thing && thing.toUpperCase ? thing.toUpperCase() : thing;
@@ -77,7 +79,7 @@ function buildAttMessageFunction(attachment) {
       //so we decode during streaming using
       if (toUpper(encoding) === "BASE64") {
         //the stream is base64 encoded, so here the stream is decode on the fly and piped to the write stream (file)
-        stream.pipe(base64.decode()).pipe(writeStream);
+        stream.pipe(new Base64Decode()).pipe(writeStream);
       } else {
         //here we have none or some other decoding streamed directly to the file which renders it useless probably
         stream.pipe(writeStream);
