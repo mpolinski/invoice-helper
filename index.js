@@ -3,6 +3,7 @@ import Imap from "imap";
 import { inspect } from "util";
 import fs from "fs";
 import base64 from "base64-stream";
+import { exit } from "process";
 
 envyaml.config();
 
@@ -14,7 +15,7 @@ const imap = new Imap({
   tls: true,
   tlsOptions: { rejectUnauthorized: false },
 });
-console.log(process.env);
+
 console.log("Starting read mail ...");
 
 function toUpper(thing) {
@@ -37,6 +38,26 @@ function findAttachmentParts(struct, attachments) {
     }
   }
   return attachments;
+}
+
+function getSearchCriteria() {
+  const searchString = process.env.SEARCH_CRITERIA;
+  const searchChunks = searchString
+    .split(",")
+    .map((element) =>
+      element
+        .trim()
+        .split(":")
+        .map((element) => element.trim())
+    )
+    .map((element) => {
+      if (element.length && element.length > 1) return element;
+      return element[0];
+    });
+  const d = new Date();
+  d.setDate(d.getDate() - process.env.SEARCH_DAYS);
+  searchChunks.push(["SINCE", d]);
+  return searchChunks;
 }
 
 function buildAttMessageFunction(attachment) {
@@ -77,10 +98,10 @@ imap.once("ready", function () {
   openInbox(function (err, box) {
     if (err) throw err;
 
-    const d = new Date();
-    d.setDate(d.getDate() - 31);
+    const searchCriteria = getSearchCriteria();
+    console.log(searchCriteria);
 
-    imap.search(["ALL", ["TEXT", "faktura"], ["SINCE", d]], (err, results) => {
+    imap.search(searchCriteria, (err, results) => {
       if (err) throw err;
       console.log(results);
       var f = imap.fetch(results, {
@@ -108,20 +129,6 @@ imap.once("ready", function () {
           console.log(prefix + "Has attachments: %d", attachments.length);
           for (var i = 0, len = attachments.length; i < len; ++i) {
             var attachment = attachments[i];
-            /*This is how each attachment looks like {
-                  partID: '2',
-                  type: 'application',
-                  subtype: 'octet-stream',
-                  params: { name: 'file-name.ext' },
-                  id: null,
-                  description: null,
-                  encoding: 'BASE64',
-                  size: 44952,
-                  md5: null,
-                  disposition: { type: 'ATTACHMENT', params: { filename: 'file-name.ext' } },
-                  language: null
-                }
-              */
             console.log(
               prefix + "Fetching attachment %s",
               attachment.params.name
